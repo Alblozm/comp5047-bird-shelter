@@ -1,0 +1,16 @@
+**/.pio/
+**/__pycache__/
+**/.DS_Store
+.env
+.env.*
+!.env.example
+camera/captures/
+*.db
+*.db-wal
+*.db-shm
+.venv/
+data/
+*.log
+dist/
+app/data/
+app/shelter.key

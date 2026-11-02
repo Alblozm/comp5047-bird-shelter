@@ -1,0 +1,17 @@
+{
+  "folders": [
+    { "name": "Shelter", "path": "." },
+    { "name": "FireBeetle", "path": "climate" },
+    { "name": "Camera", "path": "camera" }
+  ],
+  "settings": {
+    "files.encoding": "utf8",
+    "files.exclude": {
+      "**/.pio": true,
+      "**/__pycache__": true
+    }
+  },
+  "extensions": {
+    "recommendations": ["platformio.platformio-ide", "ms-python.python"]
+  }
+}

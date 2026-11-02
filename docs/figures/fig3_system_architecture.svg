@@ -1,0 +1,111 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1100 640" width="1100" height="640">
+  <!-- Figure 3: system architecture. Pins and messages match climate/src/shelter.cpp and app/shelter_console.py. -->
+  <defs>
+    <marker id="a" viewBox="0 0 10 10" refX="10" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#1f2a24"/>
+    </marker>
+    <marker id="ab" viewBox="0 0 10 10" refX="10" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#1f5f8b"/>
+    </marker>
+    <marker id="am" viewBox="0 0 10 10" refX="10" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#6b7a72"/>
+    </marker>
+    <style>
+      text { font-family: "Helvetica Neue", Helvetica, Arial, sans-serif; fill: #1f2a24; }
+      .t { font-size: 16px; font-weight: 600; }
+      .s { font-size: 13px; fill: #5d6b64; }
+      .light { fill: #ffffff; }
+      .lightsub { fill: #d4e4f1; }
+      .band { font-size: 12px; font-weight: 700; letter-spacing: 2px; fill: #44524b; }
+      .bandsub { font-size: 11.5px; fill: #7d8a84; }
+      .lab { font-size: 12.5px; fill: #1f5f8b; }
+      .labm { font-size: 12.5px; fill: #5d6b64; }
+      .leg { font-size: 12.5px; fill: #44524b; }
+      .box { fill: #ffffff; stroke: #1f2a24; stroke-width: 1.5; }
+      .wire { stroke: #1f2a24; stroke-width: 1.6; fill: none; }
+      .wifi { stroke: #1f5f8b; stroke-width: 1.6; fill: none; stroke-dasharray: 7 5; }
+      .net { stroke: #6b7a72; stroke-width: 1.6; fill: none; stroke-dasharray: 2 4; }
+    </style>
+  </defs>
+
+  <rect width="1100" height="640" fill="#ffffff"/>
+
+  <!-- panels -->
+  <rect x="16" y="16" width="566" height="560" rx="10" fill="#f5f7f6"/>
+  <rect x="598" y="16" width="290" height="560" rx="10" fill="#f5f7f6"/>
+  <rect x="904" y="16" width="180" height="560" rx="10" fill="#f5f7f6"/>
+  <text class="band" x="36" y="44">ON THE SHELTER</text>
+  <text class="bandsub" x="36" y="62">each board runs from a 10,000 mAh power bank</text>
+  <text class="band" x="618" y="44">LAPTOP</text>
+  <text class="bandsub" x="618" y="62">used by the person looking after the shelter</text>
+  <text class="band" x="924" y="44">CLOUD</text>
+  <text class="bandsub" x="924" y="62">internet</text>
+
+  <!-- sensors -->
+  <rect class="box" x="40" y="100" width="200" height="56" rx="8"/>
+  <text class="t" x="56" y="124">SHT31-F</text>
+  <text class="s" x="56" y="144">temperature, humidity · I²C</text>
+  <rect class="box" x="40" y="168" width="200" height="56" rx="8"/>
+  <text class="t" x="56" y="192">BH1750</text>
+  <text class="s" x="56" y="212">light, day or night · I²C</text>
+  <rect class="box" x="40" y="236" width="200" height="56" rx="8"/>
+  <text class="t" x="56" y="260">SEN0508</text>
+  <text class="s" x="56" y="280">water level · GPIO26</text>
+  <rect class="box" x="40" y="304" width="200" height="56" rx="8"/>
+  <text class="t" x="56" y="328">FSR 402</text>
+  <text class="s" x="56" y="348">perch pressure · GPIO34</text>
+
+  <!-- sensor bus into the controller -->
+  <path class="wire" d="M240 128 H284 M240 196 H284 M240 264 H284 M240 332 H284 M284 128 V332"/>
+  <path class="wire" d="M284 230 H330" marker-end="url(#a)"/>
+
+  <!-- controller -->
+  <rect x="330" y="160" width="220" height="140" rx="10" fill="#1f2a24"/>
+  <text class="t light" x="440" y="210" text-anchor="middle">Climate controller</text>
+  <text class="s lightsub" x="440" y="232" text-anchor="middle">FireBeetle 2 ESP32-E</text>
+  <text class="s lightsub" x="440" y="252" text-anchor="middle">misting rules and safety limits</text>
+
+  <!-- mister -->
+  <path class="wire" d="M440 300 V360" marker-end="url(#a)"/>
+  <text class="labm" x="450" y="335">GPIO25</text>
+  <rect x="330" y="360" width="220" height="64" rx="8" fill="#1f5f8b"/>
+  <text class="t light" x="440" y="387" text-anchor="middle">Ultrasonic mister</text>
+  <text class="s lightsub" x="440" y="408" text-anchor="middle">Grove atomizer, cotton wick</text>
+
+  <!-- camera -->
+  <rect class="box" x="330" y="470" width="220" height="70" rx="8"/>
+  <text class="t" x="440" y="498" text-anchor="middle">Camera board</text>
+  <text class="s" x="440" y="519" text-anchor="middle">DFRobot DFR1154</text>
+  <text class="labm" x="40" y="512">The camera has no wires to the controller.</text>
+  <text class="labm" x="40" y="530">Both boards only talk to the laptop.</text>
+
+  <!-- console -->
+  <rect class="box" x="662" y="160" width="200" height="380" rx="10" stroke="#1f5f8b" stroke-width="1.8"/>
+  <text class="t" x="762" y="322" text-anchor="middle">Console</text>
+  <text class="s" x="762" y="344" text-anchor="middle">Python + web page</text>
+  <text class="s" x="762" y="364" text-anchor="middle">visit log, thresholds, diary</text>
+
+  <!-- WiFi links -->
+  <path class="wifi" d="M550 230 H662" marker-start="url(#ab)" marker-end="url(#ab)"/>
+  <text class="lab" x="606" y="218" text-anchor="middle">status</text>
+  <text class="lab" x="606" y="250" text-anchor="middle">commands</text>
+  <path class="wifi" d="M550 505 H662" marker-start="url(#ab)" marker-end="url(#ab)"/>
+  <text class="lab" x="606" y="493" text-anchor="middle">request</text>
+  <text class="lab" x="606" y="525" text-anchor="middle">photo</text>
+
+  <!-- AI API -->
+  <rect class="box" x="924" y="290" width="140" height="92" rx="8" stroke-dasharray="5 4"/>
+  <text class="t" x="994" y="320" text-anchor="middle">AI API</text>
+  <text class="s" x="994" y="341" text-anchor="middle">gemini-2.5-flash</text>
+  <text class="s" x="994" y="360" text-anchor="middle">bird? species?</text>
+  <path class="net" d="M862 336 H924" marker-start="url(#am)" marker-end="url(#am)"/>
+  <text class="labm" x="893" y="318" text-anchor="middle">HTTPS</text>
+
+  <!-- legend -->
+  <path class="wire" d="M40 608 H80"/>
+  <text class="leg" x="90" y="612">wire</text>
+  <path class="wifi" d="M150 608 H190"/>
+  <text class="leg" x="200" y="612">WiFi through a phone hotspot (USB while debugging)</text>
+  <path class="net" d="M560 608 H600"/>
+  <text class="leg" x="610" y="612">internet</text>
+</svg>

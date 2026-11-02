@@ -1,0 +1,393 @@
+<!doctype html>
+<html lang="zh-CN">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Shelter 控制台</title>
+<style>
+:root{color-scheme:light;--bg:#f2f5ef;--card:#fff;--ink:#15332a;--muted:#66766e;--line:#dbe4d8;--green:#2b7553;--soft:#e6efe2;--amber:#b5761f;--red:#bb4436;--blue:#2e6f95}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.55 -apple-system,BlinkMacSystemFont,"Segoe UI","Microsoft YaHei",sans-serif}
+main{max-width:1320px;margin:auto;padding:24px}
+header{display:flex;justify-content:space-between;align-items:flex-end;gap:16px;flex-wrap:wrap;margin-bottom:18px}
+.eyebrow{font-size:11px;letter-spacing:3px;color:var(--green);font-weight:800}
+h1{font-size:28px;line-height:1.2;margin:6px 0 0}
+h2{font-size:17px;margin:0}
+.chips{display:flex;gap:8px;flex-wrap:wrap}
+.chip{border-radius:20px;padding:5px 12px;font-size:12px;background:#fff;border:1px solid var(--line)}
+.chip b{font-weight:600}.on{color:var(--green)}.off{color:var(--red)}.warn{color:var(--amber)}
+.grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:18px;min-width:0}
+.span2{grid-column:span 2}.span4{grid-column:1/-1}
+.head{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:6px}
+.tag{font-size:12px;padding:2px 9px;border-radius:10px;background:var(--soft);color:var(--muted);white-space:nowrap}
+.tag.ok{background:#dcefe2;color:var(--green)}.tag.bad{background:#f7e1dc;color:var(--red)}.tag.hot{background:#f7ead2;color:var(--amber)}
+.value{font-size:34px;font-weight:650;letter-spacing:-1px;line-height:1.3}
+.unit{font-size:15px;color:var(--muted);letter-spacing:0;font-weight:400}
+.muted{color:var(--muted);font-size:13px}
+.meter{position:relative;height:12px;background:#e9efe5;border-radius:10px;overflow:hidden;margin:8px 0}
+.fill{height:100%;width:0;background:linear-gradient(90deg,#7fb895,#2b7553);transition:width .3s}
+.mark{position:absolute;top:0;bottom:0;width:2px;background:var(--red)}
+canvas{width:100%;height:60px;display:block;margin-top:6px}
+.flow{display:flex;gap:6px;flex-wrap:wrap;margin:6px 0 12px}
+.step{flex:1;min-width:110px;border:1px solid var(--line);border-radius:10px;padding:8px 10px;font-size:13px;background:#fafcf8}
+.step b{display:block;font-size:12px;color:var(--muted);font-weight:600}
+.step.active{border-color:var(--blue);background:#e8f1f6}.step.done{border-color:#b9d9c4;background:#eef7f0}.step.fail{border-color:#ecc3bb;background:#fbefec}
+.photo{background:#e9efe5;border-radius:12px;min-height:220px;display:flex;align-items:center;justify-content:center;overflow:hidden}
+.photo img{max-width:100%;max-height:320px;object-fit:contain}
+.result{font-size:20px;font-weight:650;margin:10px 0 2px}
+.checks{list-style:none;padding:0;margin:8px 0}
+.checks li{padding:3px 0;font-size:14px}
+.checks li::before{content:"○ ";color:var(--muted)}.checks li.yes::before{content:"● ";color:var(--green)}.checks li.no::before{content:"● ";color:var(--red)}
+button,select,input{font:inherit}
+button{border:1px solid var(--line);border-radius:9px;padding:7px 13px;background:#fff;color:var(--ink);cursor:pointer}
+button:hover{background:#edf3e9}button.primary{background:var(--green);border-color:var(--green);color:#fff}button.danger{color:var(--red);border-color:#ebc7bf}
+button:disabled{opacity:.4;cursor:not-allowed}
+.row{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:10px}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th,td{text-align:left;padding:8px 6px;border-bottom:1px solid var(--line);vertical-align:middle}
+th{color:var(--muted);font-weight:600}
+td img{height:44px;border-radius:6px;display:block}
+.form{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:10px 18px}
+.form label{display:flex;justify-content:space-between;align-items:center;gap:10px;font-size:13px}
+.form input[type=number],.form input[type=text],.form select{width:130px;padding:5px 7px;border:1px solid var(--line);border-radius:7px}
+.form input[type=text]{width:150px}.form select{width:150px}
+.diary{white-space:pre-wrap;background:#f6f9f3;border-radius:10px;padding:12px;min-height:80px;font-size:14px}
+details summary{cursor:pointer;font-weight:600}
+.logs{height:200px;overflow:auto;background:#10281f;color:#bcd4be;padding:12px;border-radius:10px;white-space:pre-wrap;font:12px/1.6 ui-monospace,Consolas,monospace;margin-top:10px}
+.note{background:#fff4da;border:1px solid #ead59c;padding:10px 14px;border-radius:12px;margin-bottom:14px;color:#715520}
+.sim{background:#eef4fb;border-color:#c9dbea}
+.head .tag{margin-left:auto}
+.chip.lang{cursor:pointer;font-weight:600;color:var(--green)}
+.gear{padding:3px 10px;font-size:12px;border-radius:12px}
+.gear.open{background:var(--soft);border-color:#b9d1bd}
+.tune{border-top:1px dashed var(--line);margin-top:12px;padding-top:10px;display:flex;flex-direction:column;gap:14px}
+.tune[hidden]{display:none}
+.tl{display:flex;justify-content:space-between;align-items:center;gap:8px;font-size:13px;font-weight:600}
+.hint{font-size:12px;color:var(--muted);line-height:1.5}
+.band,.one{position:relative;height:34px;margin:2px 0}
+.band .track,.one .track{position:absolute;left:9px;right:9px;top:14px;height:6px;border-radius:3px;background:#e3eadf}
+.band .zone{position:absolute;top:14px;height:6px;background:repeating-linear-gradient(45deg,#f0c78b 0 4px,#f7e0bb 4px 8px)}
+.band .hi-side,.one .hi-side{position:absolute;top:14px;height:6px;right:9px;background:#b7d8c2;border-radius:0 3px 3px 0}
+.needle{position:absolute;top:4px;width:2px;height:26px;background:var(--blue);margin-left:-1px;pointer-events:none}
+.needle::after{content:attr(data-v);position:absolute;top:-15px;left:50%;transform:translateX(-50%);font-size:10px;color:var(--blue);white-space:nowrap;font-weight:700}
+.band input[type=range],.one input[type=range]{position:absolute;left:0;width:100%;top:8px;height:18px;margin:0;-webkit-appearance:none;appearance:none;background:none;pointer-events:none}
+.band input[type=range]::-webkit-slider-thumb,.one input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;pointer-events:auto;width:18px;height:18px;border-radius:50%;background:#fff;border:2px solid var(--green);cursor:grab;box-shadow:0 1px 3px rgba(0,0,0,.2)}
+.band input[type=range]::-moz-range-thumb,.one input[type=range]::-moz-range-thumb{pointer-events:auto;width:14px;height:14px;border-radius:50%;background:#fff;border:2px solid var(--green);cursor:grab}
+.band input.lo::-webkit-slider-thumb{border-color:var(--amber)}.band input.lo::-moz-range-thumb{border-color:var(--amber)}
+.band input:disabled::-webkit-slider-thumb,.one input:disabled::-webkit-slider-thumb{border-color:#bbb;cursor:not-allowed}
+.vals{display:flex;justify-content:space-between;gap:6px;font-size:12px;color:var(--muted)}
+.vals b{color:var(--ink);font-size:13px}.vals .lo b{color:var(--amber)}.vals .hi b{color:var(--green)}
+.sw{position:relative;width:38px;height:22px;flex:none}
+.sw input{opacity:0;width:0;height:0}
+.sw span{position:absolute;inset:0;background:#cfd8cc;border-radius:11px;cursor:pointer;transition:.2s}
+.sw span::before{content:"";position:absolute;width:16px;height:16px;left:3px;top:3px;background:#fff;border-radius:50%;transition:.2s}
+.sw input:checked+span{background:var(--green)}.sw input:checked+span::before{transform:translateX(16px)}
+.sw input:disabled+span{opacity:.4;cursor:not-allowed}
+.tune select,.tune input[type=text]{padding:4px 7px;border:1px solid var(--line);border-radius:7px;max-width:170px}
+.old{font-size:12px;color:var(--amber)}
+.devs{display:flex;gap:28px;flex-wrap:wrap;margin:4px 0 10px}
+.dev{display:flex;align-items:center;gap:8px;font-size:15px}
+.dev i{width:10px;height:10px;border-radius:50%;background:#c4ccc1;display:inline-block}
+.dev i.ok{background:var(--green)}.dev i.wait{background:var(--amber)}.dev span{color:var(--muted)}
+.presets{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin:-6px 0 14px;font-size:13px;color:var(--muted)}
+.toast{position:fixed;bottom:22px;left:50%;transform:translateX(-50%);padding:11px 18px;background:#15332a;color:#fff;border-radius:10px;display:none;max-width:90vw;z-index:9}
+@media(max-width:1050px){.grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:620px){main{padding:14px}.grid{grid-template-columns:1fr}.span2{grid-column:span 1}.value{font-size:30px}}
+</style>
+<main>
+<header>
+  <div><div class="eyebrow">COMP5047 · URBAN BIRD MICROCLIMATE SHELTER</div><h1>鸟类庇护所控制台</h1></div>
+  <div class="chips">
+    <span class="chip">主板 <b id="chipClimate">—</b></span>
+    <span class="chip">摄像头 <b id="chipCamera">—</b></span>
+    <span class="chip">AI <b id="chipAi">—</b></span>
+    <span class="chip">地点 <b id="chipLoc">—</b></span>
+    <button class="chip lang" id="langBtn" title="中文 / English">English</button>
+  </div>
+</header>
+<div id="fwNote" class="note" hidden>主板运行的不是 shelter 固件，控制功能不可用。请先烧录 shelter 固件。</div>
+<div id="simNote" class="note" hidden>模拟模式：没有连接真实硬件，读数和照片都是模拟的，仅供彩排。</div>
+<div class="presets">各卡片右上角 ⚙ 可以边看读数边调阈值，松手就保存。一键预设：<button onclick="act('preset','demo')">演示（室温可触发）</button><button onclick="act('preset','real')">实际部署</button></div>
+
+<div class="grid">
+  <section class="card" id="card-climate"><div class="head"><h2>温度 · 湿度</h2><span id="climTag" class="tag">—</span><button class="gear" data-tune="climate">⚙ 设置</button></div>
+    <div class="value"><span id="t">—</span><span class="unit"> °C</span></div>
+    <div class="muted">湿度 <b id="rh">—</b> %RH</div><canvas id="tChart"></canvas></section>
+  <section class="card" id="card-light"><div class="head"><h2>光照</h2><span id="dayTag" class="tag">—</span><button class="gear" data-tune="light">⚙ 设置</button></div>
+    <div class="value"><span id="lux">—</span><span class="unit"> lux</span></div>
+    <div class="meter"><div id="luxBar" class="fill"></div><div id="luxMark" class="mark"></div></div>
+    <div class="muted">红线 = 变成白天 <span id="luxDay">—</span> lux</div></section>
+  <section class="card" id="card-water"><div class="head"><h2>水箱</h2><span id="waterTag" class="tag">—</span><button class="gear" data-tune="water">⚙ 设置</button></div>
+    <div class="value" id="water">—</div>
+    <div class="muted">非接触水位传感器 · 没水时自动禁止喷雾</div></section>
+  <section class="card" id="card-perch"><div class="head"><h2>栖木</h2><span id="perchTag" class="tag">—</span><button class="gear" data-tune="perch">⚙ 设置</button></div>
+    <div class="value"><span id="fsr">—</span><span class="unit"> / 4095</span></div>
+    <div class="meter"><div id="fsrBar" class="fill"></div><div id="fsrMark" class="mark"></div></div>
+    <div class="muted">红线 = 判定有鸟</div></section>
+
+  <section class="card span2" id="card-ai"><div class="head"><h2>识别流程</h2><span id="pipeTag" class="tag">待命</span><button class="gear" data-tune="ai">⚙ 设置</button></div>
+    <div class="flow">
+      <div class="step" id="sPerch"><b>1 栖木受压</b><span>—</span></div>
+      <div class="step" id="sPhoto"><b>2 拍照</b><span>—</span></div>
+      <div class="step" id="sAi"><b>3 AI 识别</b><span>—</span></div>
+      <div class="step" id="sCheck"><b>4 检查环境</b><span>—</span></div>
+      <div class="step" id="sMist"><b>5 喷雾</b><span>—</span></div>
+    </div>
+    <div class="photo"><span id="photoEmpty" class="muted">还没有照片</span><img id="photo" alt="最新照片" hidden></div>
+    <div class="result" id="aiResult">—</div><div class="muted" id="aiNote"></div>
+    <div class="row"><button class="primary" id="checkBtn" onclick="act('check')">立即拍照识别</button></div></section>
+
+  <section class="card span2" id="card-mist"><div class="head"><h2>喷雾降温</h2><span id="mistTag" class="tag">关闭</span><button class="gear" data-tune="mist">⚙ 设置</button></div>
+    <div class="value" id="mistValue">OFF</div>
+    <ul class="checks">
+      <li id="cBird">有鸟（AI 确认或压力片）</li>
+      <li id="cDay">白天</li>
+      <li id="cHot">温度达到开始降温温度</li>
+      <li id="cDry">湿度低于上限</li>
+      <li id="cWater">水箱有水</li>
+    </ul>
+    <div class="muted">五项都满足就按设置的时长脉冲喷雾；任何一项不满足自动停止。每次连续最长 30 秒，每小时累计有上限。判断在主板上完成，控制台断开也能工作。</div>
+    <div class="row"><button onclick="act('mist_test')">测试喷雾 2 秒</button><button class="danger" onclick="act('stop')">立即停止</button></div></section>
+
+  <section class="card span2" id="card-visits"><div class="head"><h2>到访记录</h2><span class="tag" id="visitCount">0 次</span><button class="gear" data-tune="visits">⚙ 设置</button></div>
+    <div style="overflow-x:auto"><table><thead><tr><th>时间</th><th>照片</th><th>鸟种</th><th>停留</th><th>当时环境</th><th>喷雾</th></tr></thead><tbody id="visits"></tbody></table></div>
+    <div class="muted">相邻检测间隔小于“合并间隔”算同一次到访。</div></section>
+
+  <section class="card span2"><div class="head"><h2>AI 日记</h2><span class="tag" id="diaryAt">—</span></div>
+    <div class="diary" id="diary">点击下方按钮，让 AI 根据今天的到访记录和环境数据写一段日记。</div>
+    <div class="row"><button onclick="act('diary')" id="diaryBtn">生成今日日记</button></div></section>
+
+<datalist id="models"><option value="gemini-2.5-flash"><option value="gpt-5.6-luna"></datalist>
+  <section class="card span4"><div class="head"><h2>设备连接</h2></div>
+    <div class="devs"><div class="dev"><i id="dotClimate"></i><b>主板</b><span id="devClimate">—</span></div>
+      <div class="dev"><i id="dotCamera"></i><b>摄像头</b><span id="devCamera">—</span></div></div>
+    <div class="muted">电脑和两块板连同一个手机热点，板子会自动出现在这里；插 USB 线也可以。<br>
+    第一次用或换热点：手机 App “ESP BLE Provisioning” 里选这块板，PIN 填 <b>shelter5047</b>，再选热点。</div>
+    <details style="margin-top:10px"><summary class="muted">日志</summary><div class="logs" id="logs"></div></details></section>
+
+  <section class="card span4 sim" id="simCard" hidden><div class="head"><h2>模拟器</h2><span class="tag">仅模拟模式</span></div>
+    <div class="row"><button onclick="act('sim','press')">放鸟（按压栖木）</button><button onclick="act('sim','release')">鸟离开</button><button onclick="act('sim','hot')">升温 4°C</button><button onclick="act('sim','cool')">降温 4°C</button><button onclick="act('sim','dark')">天黑</button><button onclick="act('sim','light')">天亮</button><button onclick="act('sim','water')">加水</button><button onclick="act('sim','dry')">倒掉水</button>
+    <label class="muted">换一张模拟照片 <input type="file" accept="image/jpeg" onchange="simPhoto(this)"></label></div></section>
+
+</div>
+</main>
+<div id="toast" class="toast"></div>
+<script>
+const token='__TOKEN__';const $=id=>document.getElementById(id);let S=null,lastPhoto=0;
+// ---- interface language: the page is written in Chinese, EN maps each Chinese string to English ----
+const EN={
+ 'Shelter 控制台':'Shelter Console','鸟类庇护所控制台':'Bird Shelter Console','主板':'Board','摄像头':'Camera','地点':'Location',
+ '主板运行的不是 shelter 固件，控制功能不可用。请先烧录 shelter 固件。':'The board is not running the shelter firmware, so controls are unavailable.',
+ '模拟模式：没有连接真实硬件，读数和照片都是模拟的，仅供彩排。':'Simulation mode: no real hardware, readings and photos are simulated for rehearsal.',
+ '各卡片右上角 ⚙ 可以边看读数边调阈值，松手就保存。一键预设：':'Use ⚙ on a card to tune it while watching the reading; it saves when you let go. Presets:',
+ '演示（室温可触发）':'Demo (works at room temperature)','实际部署':'Deployment',
+ '温度 · 湿度':'Temperature · Humidity','⚙ 设置':'⚙ Settings','收起':'Close','湿度':'Humidity','光照':'Light',
+ '红线 = 变成白天':'Red line = day above','水箱':'Water tank','非接触水位传感器 · 没水时自动禁止喷雾':'Contactless level sensor · no misting when empty',
+ '栖木':'Perch','红线 = 判定有鸟':'Red line = bird detected','识别流程':'Detection','待命':'Idle',
+ '1 栖木受压':'1 Perch pressed','2 拍照':'2 Photo','3 AI 识别':'3 AI check','4 检查环境':'4 Conditions','5 喷雾':'5 Mist',
+ '还没有照片':'No photo yet','最新照片':'Latest photo','立即拍照识别':'Take photo & identify',
+ '喷雾降温':'Mist cooling','关闭':'Off','有鸟（AI 确认或压力片）':'Bird present (AI or perch)','白天':'Daytime',
+ '温度达到开始降温温度':'Warm enough to start cooling','湿度低于上限':'Humidity below the limit','水箱有水':'Water in the tank',
+ '五项都满足就按设置的时长脉冲喷雾；任何一项不满足自动停止。每次连续最长 30 秒，每小时累计有上限。判断在主板上完成，控制台断开也能工作。':'When all five are met it mists in pulses; if any fails it stops. Each spray lasts at most 30 s and misting per hour is capped. The board decides on its own, so it also works without the console.',
+ '测试喷雾 2 秒':'Test mist 2 s','立即停止':'Stop now','到访记录':'Visits',
+ '时间':'Time','照片':'Photo','鸟种':'Species','停留':'Stayed','当时环境':'Conditions','喷雾':'Mist',
+ '相邻检测间隔小于“合并间隔”算同一次到访。':'Detections closer together than the merge gap count as one visit.',
+ 'AI 日记':'AI diary','点击下方按钮，让 AI 根据今天的到访记录和环境数据写一段日记。':'Press the button below and the AI writes a diary entry from today\'s visits and conditions.',
+ '生成今日日记':'Write today\'s diary','设备连接':'Devices',
+ '电脑和两块板连同一个手机热点，板子会自动出现在这里；插 USB 线也可以。':'Put the computer and both boards on the same phone hotspot and the boards appear here. A USB cable also works.',
+ '第一次用或换热点：手机 App “ESP BLE Provisioning” 里选这块板，PIN 填':'First time or new hotspot: in the phone app "ESP BLE Provisioning" pick the board, enter PIN',
+ '，再选热点。':', then pick the hotspot.','日志':'Log',
+ '模拟器':'Simulator','仅模拟模式':'Simulation only','放鸟（按压栖木）':'Bird lands (press perch)','鸟离开':'Bird leaves',
+ '升温 4°C':'Warm +4°C','降温 4°C':'Cool −4°C','天黑':'Night','天亮':'Day','加水':'Fill water','倒掉水':'Empty water','换一张模拟照片':'Use another photo',
+ '温度':'Temperature','停止降温':'Stop cooling','开始降温':'Start cooling','低于才开始喷':'Start only below','达到就停':'Stop at',
+ '升到「开始降温」就喷雾，降到「停止降温」才停。中间的条纹是缓冲区，防止在临界温度来回开关。':'Misting starts at "Start cooling" and only stops at "Stop cooling". The striped buffer stops it flicking on and off.',
+ '空气已经很湿时喷雾降温效果差，还会打湿羽毛。':'In very humid air misting cools poorly and wets the feathers.',
+ '白天 / 夜晚':'Day / night','变成夜晚':'Night below','变成白天':'Day above',
+ '光照高于「变成白天」才算白天，降到「变成夜晚」以下才算天黑。手或影子挡一下不会误判。':'It becomes day above "Day above" and night below "Night below", so a passing hand or shadow does not count.',
+ '没水禁止喷雾（保护雾化片，建议一直开）':'No misting without water (protects the mister, keep on)',
+ '栖木压力':'Perch pressure','判定离开':'Bird left','判定有鸟':'Bird present',
+ '先空着栖木点「空载校准」。再放上演示鸟看蓝线读数，把「判定有鸟」拖到读数下面一点。':'With the perch empty press "Calibrate empty". Then put the bird on, watch the blue line and drag "Bird present" just below it.',
+ '空载校准（栖木上没东西时点）':'Calibrate empty (nothing on the perch)',
+ '判定方式':'Detection','比平时突然加压':'Sudden press above usual','固定阈值':'Fixed thresholds','比平时多出多少算有鸟':'Rise above usual that counts as a bird',
+ '平时的读数会自动记下来，慢慢变化（栖木变形、温度）不算，突然多出这么多就拍照识别。放上演示鸟看蓝线，把门槛设在读数的一半左右。':'The usual reading is tracked automatically and slow changes (perch settling, temperature) are ignored; a sudden rise this big takes a photo. Put the bird on, watch the blue line and set this to about half of it.',
+ '已把当前读数 {0} 记为平时的读数':'Reading {0} saved as the usual reading','每小时最多累计喷雾':'Most misting per hour','已到每小时上限':'Hourly limit reached',
+ '降温、测试都算在内。最近一小时累计喷到这个时间就停；单次连续最长 30 秒。蓝线是最近一小时已经喷了多久。':'Cooling and tests both count. Misting stops once the last hour adds up to this; one spray lasts at most 30 s. The blue line is how long it misted in the last hour.',
+ '启用 AI 识别':'Use AI identification','置信度门槛':'Confidence threshold','AI 把握高于门槛才算有鸟。蓝线是上一次识别的置信度。':'A bird counts only when the AI is more confident than this. The blue line is the last result.',
+ '认出黑色演示鸟模型':'Recognise the black demo bird','AI 不可用时':'When AI is unavailable','只凭压力片判断':'Use the perch only','不判定有鸟':'Assume no bird',
+ '每次喷雾':'Each mist','两次喷雾间隔':'Pause between mists','鸟离开后继续降温':'Keep cooling after the bird leaves',
+ '需要 AI 确认有鸟（关 = 只看压力片）':'Require AI to confirm a bird (off = perch only)','控制台断开时只看压力片':'Use the perch only if the console disconnects',
+ '到访合并间隔':'Visit merge gap','两次检测相隔小于这个时间算同一次到访。':'Detections closer together than this count as one visit.','部署地点':'Location',
+ '秒':'s','当前':'Now','主板固件较旧，更新后可调':'Board firmware too old','主板未连接':'Board not connected','摄像头未连接':'Camera not connected',
+ '已保存：':'Saved: ','已发送':'Sent','失败':'Failed','AI 正在写日记…':'The AI is writing the diary…','正在拍照识别…':'Taking a photo…',
+ '下次拍照会使用这张照片':'The next photo will use this image','已按空载读数 {0} 设置压力阈值':'Perch thresholds set from empty reading {0}',
+ '在线':'online',' · 无数据':' · no data','未连接':'Not connected','已关闭':'off','未配置':'not set up','模拟':'Simulated',
+ '已连接':'Connected','等待手机设置 WiFi':'Waiting for phone WiFi setup','在 WiFi 上，正在连接…':'On WiFi, connecting…',
+ '正常':'OK','无读数':'No reading','夜晚':'Night','有水':'Has water','没水':'Empty','缺水':'Low water',
+ '有鸟':'Bird','受压，待确认':'Pressed, checking','空':'Empty','手动触发':'Manual','受压':'Pressed','拍照中…':'Taking…','已拍照':'Taken',
+ '识别中…':'Checking…','没有鸟':'No bird','未识别':'Not identified','条件满足':'All met','{0} 项不满足':'{0} not met','间歇等待':'Pausing',
+ 'AI 确认有鸟':'AI: bird','AI：没有鸟':'AI: no bird','AI 不可用，按压力片判定有鸟':'AI unavailable, perch says bird','AI 不可用，未判定':'AI unavailable, no decision',
+ '处理中':'Working','（模型/照片）':' (model/photo)','置信度':'confidence','喷雾中':'Misting','降温中':'Cooling',
+ '{0} 次':'{0}','（仅压力）':' (perch only)','{0} 秒':'{0} s','{0} 分':'{0} min','是':'Yes','否':'No','{0} 次到访':'{0} visits',
+ '未经 AI 确认':'Not confirmed by AI','控制台已断开':'Console disconnected',
+ '未配置 AI 密钥':'AI is not set up','拍照超时':'Photo timed out','还没有栖木压力读数':'No perch reading yet','正在识别上一张照片，请稍等':'Still checking the last photo, please wait',
+ '请刷新页面':'Please refresh the page','AI 返回格式异常':'Unexpected AI reply','AI 没有返回 JSON':'Unexpected AI reply','尚未拍照':'No photo yet'};
+const EN_PREFIX=[['连不上 AI 服务：','Cannot reach the AI service: '],['AI 服务返回 ','AI service returned ']];
+let lang='zh';try{lang=localStorage.getItem('shelterLang')||'zh'}catch(e){}
+function t(s,...a){let r=lang==='en'&&EN[s]!=null?EN[s]:s;a.forEach((v,i)=>r=r.replace('{'+i+'}',v));return r}
+function tMsg(m){return lang!=='en'||!m?m:String(m).split('；').map(p=>{const x=EN_PREFIX.find(([z])=>p.startsWith(z));return x?x[1]+p.slice(x[0].length):t(p)}).join('; ')}
+const statics=[];  // text nodes written in the HTML (and the tuning panels), with their Chinese original
+function collectStatics(){const w=document.createTreeWalker(document.querySelector('main'),NodeFilter.SHOW_TEXT,{acceptNode:n=>n.parentElement.closest('script,#logs,#diary')?NodeFilter.FILTER_REJECT:NodeFilter.FILTER_ACCEPT});
+ for(let n;(n=w.nextNode());){const k=n.nodeValue.trim();if(EN[k]!=null)statics.push({n,k,lead:n.nodeValue.match(/^\s*/)[0],trail:n.nodeValue.match(/\s*$/)[0]})}}
+function applyLang(){document.documentElement.lang=lang==='en'?'en':'zh-CN';document.title=t('Shelter 控制台');$('langBtn').textContent=lang==='en'?'中文':'English';
+ statics.forEach(x=>x.n.nodeValue=x.lead+t(x.k)+x.trail);$('photo').alt=t('最新照片');
+ document.querySelectorAll('.gear').forEach(b=>b.textContent=t(b.classList.contains('open')?'收起':'⚙ 设置'));
+ try{localStorage.setItem('shelterLang',lang)}catch(e){}if(S)render(S)}
+$('langBtn').onclick=()=>{lang=lang==='en'?'zh':'en';edited.language=Date.now();applyLang();
+ post({action:'host_settings',value:{language:lang}}).catch(e=>toast(tMsg(e.message)))};
+function toast(m){$('toast').textContent=m;$('toast').style.display='block';clearTimeout(window.tt);window.tt=setTimeout(()=>$('toast').style.display='none',4500)}
+async function post(body){const r=await fetch('/api/action',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({token,...body})});const v=await r.json();if(!r.ok)throw Error(v.error||'失败');return v}
+async function act(action,value){try{if(action==='diary'){$('diaryBtn').disabled=true;toast(t('AI 正在写日记…'))}const v=await post({action,value});if(action==='calibrate')toast(t(v.mode==='sudden'?'已把当前读数 {0} 记为平时的读数':'已按空载读数 {0} 设置压力阈值',v.raw));else if(action!=='diary')toast(t(action==='check'?'正在拍照识别…':'已发送'))}catch(e){toast(tMsg(e.message))}finally{$('diaryBtn').disabled=false}}
+function simPhoto(input){const f=input.files[0];if(!f)return;const r=new FileReader();r.onload=()=>post({action:'sim_photo',value:r.result}).then(()=>toast(t('下次拍照会使用这张照片'))).catch(e=>toast(tMsg(e.message)));r.readAsDataURL(f)}
+// ---- per-card tuning panels: live reading + sliders, saved on release ----
+// band: two handles (keys[0] = lower/stop side, keys[1] = upper/start side); the gap between them is the buffer.
+const TUNES={
+ climate:[
+  {kind:'band',keys:['t_off','t_on'],min:10,max:45,step:.5,unit:'°C',live:d=>d.t,labels:['停止降温','开始降温'],title:'温度',
+   hint:'升到「开始降温」就喷雾，降到「停止降温」才停。中间的条纹是缓冲区，防止在临界温度来回开关。'},
+  {kind:'band',keys:['rh_max','rh_stop'],min:30,max:100,step:1,unit:'%',live:d=>d.rh,labels:['低于才开始喷','达到就停'],title:'湿度',
+   hint:'空气已经很湿时喷雾降温效果差，还会打湿羽毛。'}],
+ light:[
+  {kind:'band',keys:['lux_night','lux_day'],min:0,max:30000,log:true,unit:'lux',live:d=>d.lux,labels:['变成夜晚','变成白天'],title:'白天 / 夜晚',
+   hint:'光照高于「变成白天」才算白天，降到「变成夜晚」以下才算天黑。手或影子挡一下不会误判。'}],
+ water:[{kind:'toggle',key:'water_req',label:'没水禁止喷雾（保护雾化片，建议一直开）'}],
+ perch:[
+  {kind:'select',key:'perch_mode',label:'判定方式',options:[['1','比平时突然加压'],['0','固定阈值']]},
+  {kind:'slider',key:'fsr_jump',min:20,max:2000,step:10,unit:'',label:'比平时多出多少算有鸟',show:cfg=>cfg.perch_mode==null||cfg.perch_mode>=.5,
+   live:d=>typeof d.fsr==='number'&&typeof d.fsr_base==='number'?d.fsr-d.fsr_base:null,
+   hint:'平时的读数会自动记下来，慢慢变化（栖木变形、温度）不算，突然多出这么多就拍照识别。放上演示鸟看蓝线，把门槛设在读数的一半左右。'},
+  {kind:'band',keys:['fsr_off','fsr_on'],min:0,max:4095,step:5,unit:'',live:d=>d.fsr,labels:['判定离开','判定有鸟'],title:'栖木压力',show:cfg=>!(cfg.perch_mode>=.5),
+   hint:'先空着栖木点「空载校准」。再放上演示鸟看蓝线读数，把「判定有鸟」拖到读数下面一点。'},
+  {kind:'action',label:'空载校准（栖木上没东西时点）',run:()=>act('calibrate')}],
+ ai:[
+  {kind:'toggle',key:'ai_enabled',host:true,label:'启用 AI 识别'},
+  {kind:'slider',key:'confidence',host:true,min:0,max:1,step:.05,unit:'',label:'置信度门槛',live:(d,s)=>s.pipeline.result?s.pipeline.result.confidence:null,
+   hint:'AI 把握高于门槛才算有鸟。蓝线是上一次识别的置信度。'},
+  {kind:'toggle',key:'demo_bird',host:true,label:'认出黑色演示鸟模型'},
+  {kind:'select',key:'ai_fail',host:true,label:'AI 不可用时',options:[['perch','只凭压力片判断'],['none','不判定有鸟']]}],
+ mist:[
+  {kind:'slider',key:'mist_s',min:1,max:30,step:1,unit:'秒',label:'每次喷雾'},
+  {kind:'slider',key:'pause_s',min:1,max:300,step:1,unit:'秒',label:'两次喷雾间隔'},
+  {kind:'slider',key:'linger_s',min:0,max:300,step:5,unit:'秒',label:'鸟离开后继续降温'},
+  {kind:'toggle',key:'ai_required',label:'需要 AI 确认有鸟（关 = 只看压力片）'},
+  {kind:'toggle',key:'fallback',label:'控制台断开时只看压力片'},
+  {kind:'slider',key:'mist_hour_s',min:10,max:1800,step:10,unit:'秒',label:'每小时最多累计喷雾',live:d=>d.mist_hour_s,
+   hint:'降温、测试都算在内。最近一小时累计喷到这个时间就停；单次连续最长 30 秒。蓝线是最近一小时已经喷了多久。'}],
+ visits:[
+  {kind:'slider',key:'visit_gap_s',host:true,min:5,max:600,step:5,unit:'秒',label:'到访合并间隔',hint:'两次检测相隔小于这个时间算同一次到访。'},
+  {kind:'text',key:'location',host:true,label:'部署地点'}]};
+const edited={},controls=[];
+const decimals=c=>c.step&&c.step<1?String(c.step).split('.')[1].length:0;
+const fmt=(c,v)=>typeof v==='number'&&isFinite(v)?(c.log?Math.round(v):v.toFixed(decimals(c))):'—';
+function toP(c,v){return c.log?Math.round(Math.log10(Math.max(0,v)+1)/Math.log10(c.max+1)*1000):Math.round((v-c.min)/(c.max-c.min)*1000)}
+function fromP(c,p){if(c.log){const v=Math.pow(10,p/1000*Math.log10(c.max+1))-1,q=v<20?1:v<200?5:v<2000?50:500;return Math.round(v/q)*q}
+ return +(Math.round((c.min+p/1000*(c.max-c.min))/c.step)*c.step).toFixed(decimals(c))}
+const at=p=>`calc(9px + ${Math.max(0,Math.min(1000,p))/1000} * (100% - 18px))`;
+function el(tag,cls,text){const e=document.createElement(tag);if(cls)e.className=cls;if(text!=null)e.textContent=text;return e}
+function range(cls){const r=el('input',cls);r.type='range';r.min=0;r.max=1000;r.step=1;return r}
+async function saveTune(c,values){const keys=Object.keys(values);keys.forEach(k=>edited[k]=Date.now());
+ try{await post({action:c.host?'host_settings':'board_settings',value:values});toast(t('已保存：')+t(c.title||c.label))}catch(e){toast(tMsg(e.message))}}
+function buildTune(name,card){const box=el('div','tune');box.hidden=true;card.append(box);
+ TUNES[name].forEach(c=>{const row=el('div');box.append(row);const ctl={c,row};controls.push(ctl);
+  if(c.kind==='band'||c.kind==='slider'){
+   const tl=el('div','tl');tl.append(el('span','',c.title||c.label));ctl.old=el('span','old');tl.append(ctl.old);row.append(tl);
+   const bar=el('div',c.kind==='band'?'band':'one');bar.append(el('div','track'));
+   if(c.kind==='band'){ctl.zone=el('div','zone');bar.append(ctl.zone)}
+   ctl.side=el('div','hi-side');bar.append(ctl.side);
+   if(c.live){ctl.needle=el('div','needle');bar.append(ctl.needle)}
+   const vals=el('div','vals');
+   if(c.kind==='band'){ctl.lo=range('lo');ctl.hi=range('hi');bar.append(ctl.lo,ctl.hi);
+    ctl.loV=el('span','lo');ctl.hiV=el('span','hi');ctl.nowV=el('span');vals.append(ctl.loV,ctl.nowV,ctl.hiV);
+    const gap=30;   // slider units; keeps both handles grabbable and the buffer non-zero
+    const move=which=>{let pl=+ctl.lo.value,ph=+ctl.hi.value;const[ol,oh]=ctl.prev||[pl,ph];
+     // handles stacked on each other: drag left moves the lower one, drag right the upper one
+     if(oh-ol<=gap){if(which==='hi'&&ph<oh){pl=ph;ph=oh;which='lo'}else if(which==='lo'&&pl>ol){ph=pl;pl=ol;which='hi'}}
+     if(which==='lo')pl=Math.min(pl,ph-gap);else ph=Math.max(ph,pl+gap);
+     ctl.val=[fromP(c,Math.max(0,pl)),fromP(c,Math.min(1000,ph))];c.keys.forEach(k=>edited[k]=Date.now());paint(ctl)};
+    ctl.lo.oninput=()=>move('lo');ctl.hi.oninput=()=>move('hi');
+    const save=()=>saveTune(c,{[c.keys[0]]:ctl.val[0],[c.keys[1]]:ctl.val[1]});ctl.lo.onchange=save;ctl.hi.onchange=save}
+   else{ctl.one=range('hi');bar.append(ctl.one);ctl.oneV=el('span','hi');ctl.nowV=el('span');vals.append(ctl.nowV,ctl.oneV);
+    ctl.one.oninput=()=>{ctl.val=fromP(c,+ctl.one.value);edited[c.key]=Date.now();paint(ctl)};
+    ctl.one.onchange=()=>saveTune(c,{[c.key]:ctl.val})}
+   row.append(bar,vals)}
+  else if(c.kind==='toggle'){const tl=el('label','tl');tl.append(el('span','',c.label));const sw=el('span','sw');ctl.box=el('input');ctl.box.type='checkbox';
+   sw.append(ctl.box,el('span'));tl.append(sw);row.append(tl);
+   ctl.box.onchange=()=>saveTune(c,{[c.key]:c.host?ctl.box.checked:(ctl.box.checked?1:0)})}
+  else if(c.kind==='select'||c.kind==='text'){const tl=el('label','tl');tl.append(el('span','',c.label));
+   if(c.kind==='select'){ctl.input=el('select');c.options.forEach(([v,t])=>{const o=el('option','',t);o.value=v;ctl.input.append(o)})}
+   else{ctl.input=el('input');ctl.input.type='text';if(c.list)ctl.input.setAttribute('list',c.list)}
+   tl.append(ctl.input);row.append(tl);ctl.input.onchange=()=>saveTune(c,{[c.key]:ctl.input.value})}
+  else if(c.kind==='action'){const b=el('button','',c.label);b.onclick=c.run;row.append(b)}
+  if(c.hint)row.append(el('div','hint',c.hint))})}
+function paint(ctl){const c=ctl.c;
+ if(c.kind==='band'){const[lo,hi]=ctl.val||[null,null];if(lo==null)return;const pl=toP(c,lo),ph=toP(c,hi);ctl.lo.value=pl;ctl.hi.value=ph;ctl.prev=[pl,ph];
+  ctl.zone.style.left=at(pl);ctl.zone.style.width=`calc(${(ph-pl)/1000} * (100% - 18px))`;ctl.side.style.left=at(ph);
+  ctl.lo.style.zIndex=pl>900?3:1;ctl.loV.innerHTML='';ctl.loV.append(t(c.labels[0])+' ',el('b','',fmt(c,lo)),' '+t(c.unit));
+  ctl.hiV.innerHTML='';ctl.hiV.append(t(c.labels[1])+' ',el('b','',fmt(c,hi)),' '+t(c.unit))}
+ else if(c.kind==='slider'&&ctl.val!=null){const p=toP(c,ctl.val);ctl.one.value=p;ctl.side.style.left=at(0);ctl.side.style.width=`calc(${p/1000} * (100% - 18px))`;
+  ctl.side.style.borderRadius='3px';ctl.oneV.innerHTML='';ctl.oneV.append(el('b','',fmt(c,ctl.val)),' '+t(c.unit))}}
+function updateTunes(s){const d=s.devices.climate.data,cfg=s.board_cfg,boardOn=s.devices.climate.connected;
+ controls.forEach(ctl=>{const c=ctl.c,src=c.host?s.host:cfg,keys=c.keys||(c.key?[c.key]:[]);if(c.show)ctl.row.hidden=!c.show(cfg);if(!keys.length)return;
+  const have=keys.every(k=>src[k]!=null),fresh=keys.every(k=>!edited[k]||Date.now()-edited[k]>2500);
+  const off=!c.host&&!have;
+  [ctl.lo,ctl.hi,ctl.one,ctl.box,ctl.input].forEach(x=>{if(x)x.disabled=off});
+  if(ctl.old)ctl.old.textContent=off?t(boardOn?'主板固件较旧，更新后可调':'主板未连接'):'';
+  if(have&&fresh){if(c.kind==='band')ctl.val=keys.map(k=>+src[k]);else if(c.kind==='slider')ctl.val=+src[c.key];
+   else if(c.kind==='toggle')ctl.box.checked=c.host?!!src[c.key]:+src[c.key]>=.5;else if(ctl.input&&document.activeElement!==ctl.input)ctl.input.value=String(src[c.key])}
+  paint(ctl);
+  if(c.live){const v=c.live(d,s),ok=typeof v==='number'&&isFinite(v);ctl.needle.hidden=!ok;
+   if(ok){ctl.needle.style.left=at(toP(c,Math.max(c.min,Math.min(c.max,v))));ctl.needle.dataset.v=fmt(c,v)}
+   ctl.nowV.innerHTML='';ctl.nowV.append(t('当前')+' ',el('b','',ok?fmt(c,v):'—'),' '+(ok?t(c.unit):''))}})}
+document.querySelectorAll('.gear').forEach(b=>{const name=b.dataset.tune,card=$('card-'+name);buildTune(name,card);const box=card.querySelector('.tune');
+ b.onclick=()=>{box.hidden=!box.hidden;b.classList.toggle('open',!box.hidden);b.textContent=t(box.hidden?'⚙ 设置':'收起');if(S)updateTunes(S)}});
+collectStatics();applyLang();
+const n=(v,d=1)=>typeof v==='number'&&isFinite(v)?v.toFixed(d):'—';
+function tag(id,text,cls){$(id).textContent=text;$(id).className='tag '+(cls||'')}
+function li(id,state){$(id).className=state===null?'':state?'yes':'no'}
+function step(id,cls,text){$(id).className='step '+(cls||'');$(id).querySelector('span').textContent=text}
+function chart(id,hist,key,color){const c=$(id),x=c.getContext('2d'),w=c.clientWidth||260,h=60;c.width=w*2;c.height=h*2;x.scale(2,2);const v=hist.map(p=>p[key]).filter(p=>typeof p==='number');if(v.length<2)return;let lo=Math.min(...v),hi=Math.max(...v);if(hi-lo<1){lo-=.5;hi+=.5}x.strokeStyle=color;x.lineWidth=2;x.beginPath();let first=true;hist.forEach((p,i)=>{if(typeof p[key]!=='number'){first=true;return}const X=i/(hist.length-1)*w,Y=6+(hi-p[key])/(hi-lo)*(h-12);first?x.moveTo(X,Y):x.lineTo(X,Y);first=false});x.stroke()}
+async function refresh(){try{const s=await(await fetch('/api/state',{cache:'no-store'})).json();S=s;
+ // the language button also sets the species/diary language; follow it when it was changed elsewhere
+ if(s.host.language&&s.host.language!==lang&&(!edited.language||Date.now()-edited.language>2500)){lang=s.host.language;applyLang()}else render(s)}
+catch(e){$('chipClimate').textContent=t('控制台已断开');$('chipClimate').className='off'}finally{setTimeout(refresh,700)}}
+function render(s){const C=s.devices.climate,K=s.devices.camera,d=C.data,cfg=s.board_cfg,fresh=C.connected&&C.age!==null&&C.age<4;
+$('chipClimate').textContent=C.connected?t(C.via||'在线')+(fresh?'':t(' · 无数据')):t('未连接');$('chipClimate').className=fresh?'on':'off';
+$('chipCamera').textContent=K.connected?t(K.via||'在线'):t('未连接');$('chipCamera').className=K.connected?'on':'off';
+const devLine=r=>{const x=s.devices[r],seen=s.wifi_seen&&s.wifi_seen[r];if(x.connected)return['ok',t('已连接')+(x.via?(lang==='en'?' (':'（')+t(x.via)+(lang==='en'?')':'）'):'')];if(x.data.ble)return['wait',t('等待手机设置 WiFi')];if(seen&&seen.age<10)return['wait',t('在 WiFi 上，正在连接…')];return['',t('未连接')]};[['climate','Climate'],['camera','Camera']].forEach(([r,id])=>{const[c,m]=devLine(r);$('dot'+id).className=c;$('dev'+id).textContent=m});
+$('chipAi').textContent=!s.host.ai_enabled?t('已关闭'):s.ai.configured?s.ai.model:t('未配置');$('chipAi').className=s.host.ai_enabled&&s.ai.configured?'on':'warn';
+$('chipLoc').textContent=s.host.location;$('fwNote').hidden=s.firmware_ok;$('simNote').hidden=!s.simulate;$('simCard').hidden=!s.simulate;
+$('t').textContent=n(d.t);$('rh').textContent=n(d.rh);tag('climTag',t(fresh&&typeof d.t==='number'?'正常':'无读数'),fresh&&typeof d.t==='number'?'ok':'bad');chart('tChart',s.history,'t','#2b7553');
+$('lux').textContent=n(d.lux,0);const lg=v=>Math.min(100,Math.log10(Math.max(0,v)+1)/4.5*100);$('luxBar').style.width=(typeof d.lux==='number'?lg(d.lux):0)+'%';$('luxMark').style.left=(cfg.lux_day!=null?lg(cfg.lux_day):0)+'%';$('luxDay').textContent=n(cfg.lux_day,0);tag('dayTag',t(d.day?'白天':'夜晚'),d.day?'ok':'');
+$('water').textContent=d.water===1?t('有水'):d.water===0?t('没水'):'—';tag('waterTag',t(d.water===1?'正常':'缺水'),d.water===1?'ok':'bad');
+$('fsr').textContent=n(d.fsr,0);$('fsrBar').style.width=(typeof d.fsr==='number'?d.fsr/40.95:0)+'%';const fsrAt=cfg.perch_mode>=.5&&typeof d.fsr_base==='number'?d.fsr_base+cfg.fsr_jump:cfg.fsr_on;$('fsrMark').style.left=(fsrAt!=null?Math.min(4095,fsrAt)/40.95:0)+'%';tag('perchTag',t(d.perch?(d.bird?'有鸟':'受压，待确认'):'空'),d.perch?(d.bird?'ok':'hot'):'');
+const p=s.pipeline,st=p.stage,r=p.result;step('sPerch',d.perch?'done':'',t(p.trigger==='manual'?'手动触发':d.perch?'受压':'空'));
+step('sPhoto',st==='photo'?'active':p.photo?'done':(st==='idle'?'':'fail'),t(st==='photo'?'拍照中…':p.photo?'已拍照':st==='idle'?'—':'失败'));
+step('sAi',st==='ai'?'active':r?'done':(['decide','done'].includes(st)?'fail':''),t(st==='ai'?'识别中…':r?(r.bird?'有鸟':'没有鸟'):['decide','done'].includes(st)?'未识别':'—'));
+const conds=[!!d.bird,!!d.day,typeof d.t==='number'&&cfg.t_on!=null&&d.t>=cfg.t_on,typeof d.rh==='number'&&cfg.rh_max!=null&&d.rh<cfg.rh_max,d.water===1||cfg.water_req===0];
+li('cBird',d.bird);li('cDay',d.day);li('cHot',conds[2]);li('cDry',conds[3]);li('cWater',conds[4]);
+step('sCheck',d.cooling?'done':d.bird?'active':'',d.cooling?t('条件满足'):d.bird?t('{0} 项不满足',conds.filter(x=>!x).length):'—');
+step('sMist',d.mist?'done':'',t(d.mist?'喷雾中':d.cooling&&d.mist_limit?'已到每小时上限':d.cooling?'间歇等待':'—'));
+const dec={bird:'AI 确认有鸟',no_bird:'AI：没有鸟',fallback_bird:'AI 不可用，按压力片判定有鸟',fallback_none:'AI 不可用，未判定'};
+tag('pipeTag',t(s.busy?'处理中':p.decision?dec[p.decision]:'待命'),p.decision==='bird'||p.decision==='fallback_bird'?'ok':s.busy?'hot':'');
+$('aiResult').textContent=r?(r.bird?(lang==='zh'?r.species_zh:r.species_en)+(r.is_model?t('（模型/照片）'):''):t('没有鸟'))+' · '+t('置信度')+' '+Math.round(r.confidence*100)+'%':p.error?t('未识别'):'—';
+$('aiNote').textContent=[r&&r.note,tMsg(p.error)].filter(Boolean).join(' ｜ ');$('checkBtn').disabled=s.busy||!K.connected;
+if(s.photo_at&&s.photo_at!==lastPhoto){lastPhoto=s.photo_at;$('photo').src='/api/photo?t='+lastPhoto;$('photo').hidden=false;$('photoEmpty').hidden=true}
+$('mistValue').textContent=d.mist?'ON':'OFF';tag('mistTag',t(d.mist?'喷雾中':d.cooling?'降温中':'关闭'),d.mist||d.cooling?'ok':'');
+const loc=lang==='en'?'en-AU':'zh-CN';
+const tb=$('visits');tb.textContent='';$('visitCount').textContent=t('{0} 次',s.visits.length);s.visits.forEach(v=>{const tr=document.createElement('tr');const time=new Date(v.start*1000).toLocaleString(loc,{month:'numeric',day:'numeric',hour:'2-digit',minute:'2-digit',second:'2-digit'});const dur=Math.max(0,Math.round(v.end-v.start));const cells=[time,'',(v.names&&v.names[lang]||t(v.species))+(v.source==='perch'?t('（仅压力）'):''),dur<60?t('{0} 秒',dur):t('{0} 分',(dur/60).toFixed(1)),n(v.t)+'°C / '+n(v.rh,0)+'%',t(v.misted?'是':'否')];cells.forEach((c,i)=>{const td=document.createElement('td');if(i===1&&v.photo){const im=document.createElement('img');im.src='/photos/'+v.photo;im.loading='lazy';td.append(im)}else td.textContent=c;tr.append(td)});tb.append(tr)});
+if(s.diary&&s.diary.text){$('diary').textContent=s.diary.text;$('diaryAt').textContent=s.diary.date+' · '+t('{0} 次到访',s.diary.visits)}
+else $('diary').textContent=t('点击下方按钮，让 AI 根据今天的到访记录和环境数据写一段日记。');
+updateTunes(s);
+const text=s.logs.map(x=>new Date(x.at*1000).toLocaleTimeString(loc)+' ['+x.role+'] '+x.text).join('\n');if($('logs').textContent!==text){$('logs').textContent=text;$('logs').scrollTop=1e9}}
+refresh();
+</script>
+</html>
